@@ -58,6 +58,7 @@ def color_proc():
             channels.append(channel)
             chn_idx = chn_end
         scipy.misc.imsave(rec_img_path, channels)
+    return (for_proc_fun, rev_proc_fun)
 
 
 def jpeg_comp_dct(img, Q=50, ds_chroma_0 = 2, ds_chroma_1 = 1):
