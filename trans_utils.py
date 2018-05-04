@@ -23,7 +23,7 @@ from numpy.fft import ifft
 from numpy.fft import ifftshift
 import bitarray
 from  scipy.io.wavfile import read as wavread
-#import newax25 as ax25
+import newax25 as ax25
 
 import multiprocessing
 

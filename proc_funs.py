@@ -32,7 +32,53 @@ def grayscale_proc():
         scipy.misc.imsave(rec_img_path, rec_mtx)
     return (for_proc_fun, rev_proc_fun)
 
+def channels_to_bytes(channels):
+    byte_list = []
+    shapes = []
+    for channel in channels:
+        curr_shape = channel.shape
+        shapes.append(curr_shape)
+        flattened_channel = np.reshape(channel, (curr_shape[0]*curr_shape[1]))
+        curr_bytes = flattened_channel.tobytes()
+        byte_list.append(curr_bytes)
+    all_bytes = b''.join(byte_list)
+    return (all_bytes, shapes)
 
+def bytes_to_channels(bytes_str, shapes):
+    flattend_channels = np.frombuffer(bytes_str, dtype = np.uint8)
+    channels = []
+    chn_idx = 0
+    for shape in shapes:
+        chn_end = chn_idx + shape[0]*shape[1]
+        flat_chn = flattend_channels[chn_idx:chn_end]
+        channel = np.reshape(flat_chn, shape)
+        channels.append(channel)
+        chn_idx = chn_end
+    return channels
+
+def get_channels(img):
+    return [img[:,:,0], img[:,:,1], img[:,:,2]]
+
+def channels2img(channels):
+    return np.stack(channels, axis = 2)
+
+def down_up_samp(ds_dim_0, ds_dim_1, img_shape):
+    
+    def for_proc_fun(img_path):
+        img = scipy.ndimage.imread(img_path)
+        img_ds = down_samp(img, ds_dim_0, ds_dim_1)
+        ds_channels = get_channels(img_ds)
+        ds_bytes, ds_shapes = channels_to_bytes(ds_channels)
+        return (ds_bytes, ds_shapes)
+    
+    def rev_proc_fun(rec_img_path, img_bytes, shapes):
+        ds_channels = bytes_to_channels(img_bytes, shapes)
+        ds_img = channels2img(ds_channels)
+        us_img = up_samp_img(ds_img, img_shape)
+        scipy.misc.imsave(rec_img_path, us_img)
+    return (for_proc_fun, rev_proc_fun)
+            
+    
 def color_proc(Q, ds_chroma_0, ds_chroma_1):
 
     def for_proc_fun(img_path):
