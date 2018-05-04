@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 
 def no_proc():
     def for_proc_fun(img_path):
@@ -59,7 +60,7 @@ def color_proc(Q, ds_chroma_0, ds_chroma_1):
             chn_idx = chn_end
         decomped_channels = jpeg_decomp_dct(channels, shapes, Q, ds_chroma_0, ds_chroma_1)
         scipy.misc.imsave(rec_img_path, decomped_channels)
-        
+
     return (for_proc_fun, rev_proc_fun)
 
 
