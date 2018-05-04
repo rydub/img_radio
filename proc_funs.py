@@ -25,5 +25,12 @@ def grayscale_proc(shape):
         rows, cols = shape
         rec_mtx = np.reshape(rec_vec, [rows, cols])
         scipy.misc.imsave(rec_img_path, rec_mtx)
-    
     return (for_proc_fun, rev_proc_fun)
+
+def color_proc(shape):
+	def for_proc_fun(img_path):
+		return 0
+
+	def for_proc_fun(rec_img_path, img_bytes):
+		adummy = 1
+	return(for_proc_fun, rev_proc_fun)
