@@ -29,12 +29,12 @@ def grayscale_proc():
     return (for_proc_fun, rev_proc_fun)
 
 
-def color_proc():
+def color_proc(Q, ds_chroma_0, ds_chroma_1):
 
     def for_proc_fun(img_path):
         test_img = scipy.ndimage.imread(img_path)
-
-        channels = [test_img[:,:,0], test_img[:,:,1], test_img[:,:,2]]
+        channels = jpeg_comp_dct(test_img, Q, ds_chroma_0, ds_chroma_1)
+        #channels = [test_img[:,:,0], test_img[:,:,1], test_img[:,:,2]]
         byte_list = []
         shapes = []
         for channel in channels:
@@ -57,7 +57,9 @@ def color_proc():
             channel = np.reshape(flat_chn, shape)
             channels.append(channel)
             chn_idx = chn_end
-        scipy.misc.imsave(rec_img_path, channels)
+        decomped_channels = jpeg_decomp_dct(channels, shapes, Q, ds_chroma_0, ds_chroma_1)
+        scipy.misc.imsave(rec_img_path, decomped_channels)
+        
     return (for_proc_fun, rev_proc_fun)
 
 
