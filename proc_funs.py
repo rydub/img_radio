@@ -69,7 +69,11 @@ def color_proc(Q, ds_chroma_0, ds_chroma_1):
 def down_samp(img, dim_0_n=1, dim_1_n=1):
     return img[::dim_0_n, ::dim_1_n]
 
-def up_samp_img(img, shape, interp = lycon.Interpolation.CUBIC):
+def up_samp(img, shape):
+    old_shape = img.shape
+    return scipy.ndimage.zoom(img, [shape[0]/old_shape[0], shape[1]/old_shape[1]])
+
+def up_samp_img(img, shape):
     old_shape = img.shape
     return scipy.ndimage.zoom(img, [shape[0]/old_shape[0], shape[1]/old_shape[1], 1])
 
