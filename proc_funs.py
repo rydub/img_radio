@@ -66,13 +66,18 @@ def color_proc(Q, ds_chroma_0, ds_chroma_1):
 
     return (for_proc_fun, rev_proc_fun)
 
+def down_samp(img, dim_0_n=1, dim_1_n=1):
+    return img[::dim_0_n, ::dim_1_n]
+
+def up_samp_img(img, shape, interp = lycon.Interpolation.CUBIC):
+    old_shape = img.shape
+    return scipy.ndimage.zoom(img, [shape[0]/old_shape[0], shape[1]/old_shape[1], 1])
 
 def jpeg_comp_dct(img, Q=50, ds_chroma_0 = 2, ds_chroma_1 = 1):
     #convert to YCbCr
     img_shape = img.shape
     img_ycbcr = rgb2YCbCr(img)
-    channels = [img_ycbcr[:,:,0], img_ycbcr[:,:,1], img_ycbcr[:,:,2]]
-    #channels = [img_ycbcr[:,:,0], down_samp(img_ycbcr[:,:,1], ds_chroma_0, ds_chroma_1), down_samp(img_ycbcr[:,:,2], ds_chroma_0, ds_chroma_1)]
+    channels = [img_ycbcr[:,:,0], down_samp(img_ycbcr[:,:,1], ds_chroma_0, ds_chroma_1), down_samp(img_ycbcr[:,:,2], ds_chroma_0, ds_chroma_1)]
     for i in range(len(channels)):
         curr_shape = channels[i].shape
         rem_dim_0 = curr_shape[0] % 8
@@ -95,9 +100,11 @@ def jpeg_comp_dct(img, Q=50, ds_chroma_0 = 2, ds_chroma_1 = 1):
     #Quantize dct components
     channels = quantize_jpeg_dct(channels, Q=Q)
     for chn_ind in range(len(channels)):
-        channels[chn_ind] = np.clip(channels[chn_ind], 0, 255)   
+        channels[chn_ind] = np.clip(channels[chn_ind], 0, 255) 
+        channels[chn_ind] = channels[chn_ind].astype(np.uint8)
     
     return channels
+    
 
 
 def jpeg_decomp_dct(channels, img_shape, Q=50, ds_chroma_0 = 2, ds_chroma_1 = 1):
@@ -114,13 +121,13 @@ def jpeg_decomp_dct(channels, img_shape, Q=50, ds_chroma_0 = 2, ds_chroma_1 = 1)
             channels[chn_ind] = channels[chn_ind][:img_shape[0],:img_shape[1]]
         #otherwise we need to take how many downsampled samples we had
         else:
-            dim_0_samps = img_shape[0] #//ds_chroma_0
-            dim_1_samps = img_shape[1] #//ds_chroma_1
+            dim_0_samps = img_shape[0]//ds_chroma_0
+            dim_1_samps = img_shape[1]//ds_chroma_1
             channels[chn_ind] = channels[chn_ind][:dim_0_samps,:dim_1_samps]            
             
     # interpolate chroma channels back to original size
-    #for chn_ind in range(1,len(channels)):      
-    #    channels[chn_ind] = up_samp(channels[chn_ind], (img_shape[0], img_shape[1]))
+    for chn_ind in range(1,len(channels)):      
+        channels[chn_ind] = up_samp(channels[chn_ind], (img_shape[0], img_shape[1]))
     ycbcr_img = np.stack(channels, axis = 2)
     rgb_img = YCbCr2rgb(ycbcr_img)
     rgb_img = np.around(rgb_img)
