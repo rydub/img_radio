@@ -1,4 +1,4 @@
-
+import numpy as np
 
 def no_proc():
     def for_proc_fun(img_path):
