@@ -163,6 +163,18 @@ def adjust_quant_mat(Q = 50):
     return adjust_quant_mat
 
 
+def rgb2YCbCr(img):
+    R = img[:,:,0]
+    G = img[:,:,1]
+    B = img[:,:,2]
+    Y = 0.299*R + 0.587*G + 0.114*B
+    Cb = 128*np.ones(R.shape) - 0.168736*R - 0.331264*G + 0.5*B
+    Cr = 128*np.ones(R.shape) + 0.5*R -0.418688*G - 0.081312*B
+    channels = [Y, Cb, Cr]
+    img_YCbCr = np.stack(channels, axis = 2)
+    return img_YCbCr
+    
+
 def YCbCr2rgb(img):
     Y = img[:,:,0]
     Cb = img[:,:,1]
